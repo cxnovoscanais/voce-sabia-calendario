@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Você Sabia? — Calendário Editorial</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Baloo+2:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --purple: #5B2D8E; --purple-light: #7B4DBE; --yellow: #F5A623;
+    --pink: #E91E8C; --green: #25D366; --bg: #F4F0FF;
+    --card-bg: #ffffff; --text: #2D1654; --muted: #8B7BAF; --border: #DDD0F5;
+  }
+  body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 32px 20px 60px; }
+
+  header { text-align: center; margin-bottom: 40px; }
+  .logo-badge { display: inline-flex; align-items: center; gap: 10px; background: var(--purple); color: #fff; border-radius: 50px; padding: 8px 22px 8px 16px; font-size: 13px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 18px; }
+  h1 { font-family: 'Baloo 2', sans-serif; font-size: clamp(2rem, 5vw, 3.2rem); color: var(--purple); line-height: 1.1; }
+  h1 em { color: var(--yellow); font-style: normal; }
+  .subtitle { margin-top: 10px; color: var(--muted); font-size: 15px; font-weight: 600; }
+  .export-btn { margin-top: 18px; display: inline-flex; align-items: center; gap: 8px; background: var(--purple); color: #fff; border: none; border-radius: 50px; padding: 12px 28px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px; cursor: pointer; transition: all .2s; box-shadow: 0 6px 20px rgba(91,45,142,.3); }
+  .export-btn:hover { background: #3d1a6e; transform: translateY(-2px); box-shadow: 0 10px 28px rgba(91,45,142,.35); }
+  .export-btn:active { transform: translateY(0); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; justify-content: center; }
+  .legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 700; color: var(--muted); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+
+  .tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 32px; flex-wrap: wrap; }
+  .tab-btn { background: #fff; border: 2px solid var(--border); color: var(--muted); border-radius: 50px; padding: 10px 26px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 15px; cursor: pointer; transition: all .2s; }
+  .tab-btn.active, .tab-btn:hover { background: var(--purple); border-color: var(--purple); color: #fff; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,45,142,.25); }
+
+  .month-section { display: none; }
+  .month-section.active { display: block; }
+  .month-title { font-family: 'Baloo 2', sans-serif; font-size: 1.7rem; color: var(--purple); margin-bottom: 24px; display: flex; align-items: center; gap: 10px; }
+  .month-title::after { content: ''; flex: 1; height: 3px; background: linear-gradient(90deg, var(--purple), transparent); border-radius: 2px; }
+
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 22px; }
+
+  .card { background: var(--card-bg); border-radius: 20px; padding: 22px 22px 18px; border: 2px solid var(--border); position: relative; overflow: hidden; transition: transform .2s, box-shadow .2s; }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(91,45,142,.12); }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; border-radius: 20px 20px 0 0; }
+  .card.dica::before     { background: linear-gradient(90deg, #5B2D8E, #7B4DBE); }
+  .card.curso::before    { background: linear-gradient(90deg, #F5A623, #FF6B35); }
+  .card.campanha::before { background: linear-gradient(90deg, #E91E8C, #FF4D94); }
+  .card.processo::before { background: linear-gradient(90deg, #25D366, #128C7E); }
+  .card.motivacao::before{ background: linear-gradient(90deg, #FF6B35, #F5A623); }
+
+  /* CARD HEADER */
+  .card-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+  .card-icon { width: 44px; height: 44px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-size: 21px; flex-shrink: 0; }
+  .dica .card-icon     { background: #EDE0FF; }
+  .curso .card-icon    { background: #FFF3DC; }
+  .campanha .card-icon { background: #FFE0F3; }
+  .processo .card-icon { background: #DCFFF0; }
+  .motivacao .card-icon{ background: #FFE8DC; }
+  .card-meta { flex: 1; min-width: 0; }
+
+  /* DATE ROW — inline editing */
+  .card-date-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+  .card-date { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .reorder-btn { background: none; border: none; cursor: pointer; color: var(--muted); padding: 2px 4px; border-radius: 6px; font-size: 11px; font-weight: 700; display: flex; align-items: center; gap: 3px; transition: all .15s; opacity: 0.6; }
+  .reorder-btn:hover { background: #EDE0FF; color: var(--purple); opacity: 1; }
+
+  /* DATE PICKER PANEL */
+  .date-picker { display: none; background: #F8F4FF; border: 2px solid var(--purple-light); border-radius: 12px; padding: 12px 14px; margin: 8px 0; }
+  .date-picker.open { display: block; }
+  .date-picker label { font-size: 11px; font-weight: 800; color: var(--purple); text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: 6px; }
+  .date-picker input[type="date"] { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 7px 10px; font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); background: #fff; cursor: pointer; }
+  .date-picker input[type="date"]:focus { outline: none; border-color: var(--purple); box-shadow: 0 0 0 3px rgba(91,45,142,.1); }
+  .date-picker-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .dp-confirm { background: var(--purple); color: #fff; border: none; border-radius: 50px; padding: 6px 16px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 12px; cursor: pointer; transition: background .2s; }
+  .dp-confirm:hover { background: #3d1a6e; }
+  .dp-cancel { background: none; color: var(--muted); border: 1.5px solid var(--border); border-radius: 50px; padding: 6px 14px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 12px; cursor: pointer; }
+
+  /* CATEGORY BADGE — clickable */
+  .card-category { display: inline-block; font-size: 10px; font-weight: 900; text-transform: uppercase; letter-spacing: .1em; border-radius: 50px; padding: 2px 10px; cursor: pointer; transition: opacity .15s; }
+  .card-category:hover { opacity: 0.75; }
+  .dica .card-category     { background: #EDE0FF; color: #5B2D8E; }
+  .curso .card-category    { background: #FFF3DC; color: #B07400; }
+  .campanha .card-category { background: #FFE0F3; color: #9B0059; }
+  .processo .card-category { background: #DCFFF0; color: #00704A; }
+  .motivacao .card-category{ background: #FFE8DC; color: #B04000; }
+
+  /* CATEGORY PICKER */
+  .cat-picker { display: none; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
+  .cat-picker.open { display: flex; }
+  .cat-opt { border: 1.5px solid var(--border); border-radius: 50px; padding: 3px 12px; font-size: 11px; font-weight: 800; cursor: pointer; transition: all .15s; background: #fff; color: var(--muted); }
+  .cat-opt:hover, .cat-opt.selected { border-color: var(--purple); background: var(--purple); color: #fff; }
+
+  /* TITLE */
+  .card-title { font-size: 15px; font-weight: 900; color: var(--text); margin-bottom: 10px; line-height: 1.3; }
+  .card-title[contenteditable="true"] { outline: none; background: #F8F4FF; border-radius: 8px; padding: 4px 8px; border: 2px dashed var(--purple-light); cursor: text; }
+  .card-title[contenteditable="true"]:focus { background: #fff; border-color: var(--purple); box-shadow: 0 0 0 3px rgba(91,45,142,.1); }
+
+  /* CONTENT */
+  .card-content { font-size: 13.5px; color: #4A3870; line-height: 1.65; white-space: pre-wrap; }
+  .card-content[contenteditable="true"] { outline: none; background: #F8F4FF; border-radius: 10px; padding: 10px 12px; border: 2px dashed var(--purple-light); cursor: text; }
+  .card-content[contenteditable="true"]:focus { background: #fff; border-color: var(--purple); box-shadow: 0 0 0 4px rgba(91,45,142,.1); }
+
+  .edit-hint { font-size: 11px; color: var(--purple-light); margin-top: 6px; display: none; font-weight: 600; font-style: italic; }
+  .edit-hint.visible { display: block; }
+
+  /* ACTIONS */
+  .card-actions { display: flex; gap: 7px; margin-top: 14px; flex-wrap: wrap; }
+  .action-btn { display: flex; align-items: center; gap: 6px; background: none; border: 1.5px solid var(--border); border-radius: 50px; padding: 6px 14px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 11.5px; color: var(--muted); cursor: pointer; transition: all .2s; }
+  .action-btn:hover { background: var(--purple); border-color: var(--purple); color: #fff; }
+  .action-btn.active-edit { background: var(--purple); border-color: var(--purple); color: #fff; }
+  .action-btn.save { background: var(--purple); border-color: var(--purple); color: #fff; display: none; }
+  .action-btn.save:hover { background: #3d1a6e; }
+  .action-btn.save.visible { display: flex; }
+  .action-btn.discard { border-color: #FFB3B3; color: #CC3333; display: none; }
+  .action-btn.discard:hover { background: #FFE5E5; border-color: #FF8888; }
+  .action-btn.discard.visible { display: flex; }
+  .action-btn.copy:hover { background: var(--green); border-color: var(--green); color: #fff; }
+  .action-btn.copy.copied { background: var(--green); border-color: var(--green); color: #fff; }
+
+  /* CONFLICT BADGE */
+  .conflict-badge { display: none; background: #FFF3DC; border: 1.5px solid #F5A623; border-radius: 8px; padding: 6px 10px; font-size: 11px; font-weight: 700; color: #B07400; margin-top: 8px; }
+  .conflict-badge.show { display: block; }
+
+  @media (max-width: 600px) { .cards-grid { grid-template-columns: 1fr; } }
+
+  /* NEW MESSAGE BUTTON */
+  .new-msg-bar { margin-bottom: 20px; }
+  .new-msg-btn { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 2px dashed var(--purple-light); color: var(--purple); border-radius: 50px; padding: 10px 22px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px; cursor: pointer; transition: all .2s; }
+  .new-msg-btn:hover { background: var(--purple); border-color: var(--purple); color: #fff; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(91,45,142,.2); }
+
+  /* MODAL */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(30,10,60,.45); backdrop-filter: blur(3px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.open { display: flex; }
+  .modal-box { background: #fff; border-radius: 24px; padding: 32px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(91,45,142,.25); animation: modalIn .2s ease; }
+  @keyframes modalIn { from { opacity:0; transform: translateY(16px) scale(.97); } to { opacity:1; transform: none; } }
+
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .modal-title { font-family: 'Baloo 2', sans-serif; font-size: 1.3rem; color: var(--purple); font-weight: 800; }
+  .modal-close { background: #EDE0FF; border: none; color: var(--purple); border-radius: 50%; width: 32px; height: 32px; font-size: 16px; cursor: pointer; font-weight: 900; display: flex; align-items: center; justify-content: center; transition: background .15s; }
+  .modal-close:hover { background: var(--purple); color: #fff; }
+
+  .modal-field { margin-bottom: 18px; }
+  .modal-field label { display: block; font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .07em; color: var(--purple); margin-bottom: 7px; }
+  .modal-field input[type="date"],
+  .modal-field input[type="text"] { width: 100%; border: 2px solid var(--border); border-radius: 12px; padding: 10px 14px; font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 600; color: var(--text); background: #fff; transition: border-color .2s; }
+  .modal-field input:focus { outline: none; border-color: var(--purple); box-shadow: 0 0 0 3px rgba(91,45,142,.1); }
+  .modal-field textarea { width: 100%; border: 2px solid var(--border); border-radius: 12px; padding: 10px 14px; font-family: 'Nunito', sans-serif; font-size: 13.5px; font-weight: 600; color: var(--text); resize: vertical; line-height: 1.6; transition: border-color .2s; }
+  .modal-field textarea:focus { outline: none; border-color: var(--purple); box-shadow: 0 0 0 3px rgba(91,45,142,.1); }
+  .field-hint { font-size: 11px; color: #CC3333; font-weight: 700; margin-top: 4px; display: block; min-height: 16px; }
+
+  .nm-cat-row { display: flex; flex-wrap: wrap; gap: 8px; }
+  .nm-cat-opt { border: 2px solid var(--border); border-radius: 50px; padding: 5px 14px; font-size: 12px; font-weight: 800; cursor: pointer; transition: all .15s; background: #fff; color: var(--muted); user-select: none; }
+  .nm-cat-opt:hover { border-color: var(--purple-light); color: var(--purple); }
+  .nm-cat-opt.selected { background: var(--purple); border-color: var(--purple); color: #fff; }
+
+  .modal-warn { font-size: 12px; font-weight: 700; color: #B07400; background: #FFF3DC; border: 1.5px solid #F5A623; border-radius: 10px; padding: 8px 12px; margin-bottom: 16px; display: none; }
+  .modal-warn.show { display: block; }
+
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 8px; }
+  .modal-cancel { background: none; border: 2px solid var(--border); border-radius: 50px; padding: 10px 22px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px; color: var(--muted); cursor: pointer; transition: all .2s; }
+  .modal-cancel:hover { border-color: var(--muted); color: var(--text); }
+  .modal-confirm { background: var(--purple); border: 2px solid var(--purple); border-radius: 50px; padding: 10px 28px; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 14px; color: #fff; cursor: pointer; transition: all .2s; }
+  .modal-confirm:hover { background: #3d1a6e; border-color: #3d1a6e; }
+
+  /* ATTACHMENT — modal upload zone */
+  .upload-zone { border: 2px dashed var(--border); border-radius: 14px; padding: 20px; text-align: center; cursor: pointer; transition: all .2s; background: #FAFAFE; position: relative; }
+  .upload-zone:hover, .upload-zone.drag { border-color: var(--purple-light); background: #F0EAFF; }
+  .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-zone-icon { font-size: 28px; margin-bottom: 6px; }
+  .upload-zone-label { font-size: 13px; font-weight: 700; color: var(--muted); }
+  .upload-zone-label span { color: var(--purple); text-decoration: underline; }
+  .upload-zone-types { font-size: 11px; color: var(--muted); margin-top: 4px; font-weight: 600; }
+
+  /* ATTACHMENT — preview inside modal */
+  .nm-preview { display: none; margin-top: 12px; border-radius: 12px; overflow: hidden; border: 2px solid var(--border); position: relative; }
+  .nm-preview.show { display: block; }
+  .nm-preview img { width: 100%; max-height: 200px; object-fit: cover; display: block; }
+  .nm-preview-file { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: #F8F4FF; }
+  .nm-preview-file-icon { font-size: 28px; }
+  .nm-preview-file-info { flex: 1; min-width: 0; }
+  .nm-preview-file-name { font-size: 13px; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nm-preview-file-type { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+  .nm-preview-remove { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,.5); color: #fff; border: none; border-radius: 50%; width: 26px; height: 26px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 900; transition: background .15s; }
+  .nm-preview-remove:hover { background: rgba(200,0,0,.8); }
+
+  /* ATTACHMENT — card preview */
+  .card-attachment { margin: 10px 0; border-radius: 12px; overflow: hidden; border: 1.5px solid var(--border); }
+  .card-attachment img { width: 100%; max-height: 180px; object-fit: cover; display: block; cursor: pointer; transition: opacity .2s; }
+  .card-attachment img:hover { opacity: .88; }
+  .card-attachment-file { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: #F8F4FF; border-radius: 12px; }
+  .card-attachment-file-icon { font-size: 24px; }
+  .card-attachment-file-info { flex: 1; min-width: 0; }
+  .card-attachment-file-name { font-size: 12px; font-weight: 800; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-attachment-file-type { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+  .card-attach-btn { display: flex; align-items: center; gap: 6px; background: none; border: 1.5px solid var(--border); border-radius: 50px; padding: 6px 14px; font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 11.5px; color: var(--muted); cursor: pointer; transition: all .2s; position: relative; overflow: hidden; }
+  .card-attach-btn input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; }
+  .card-attach-btn:hover { background: var(--purple); border-color: var(--purple); color: #fff; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-badge"><span>💡</span> Consultoria Educação</div>
+  <h1>Você <em>Sabia?</em></h1>
+  <p class="subtitle">Calendário editorial de disparos WhatsApp — equipe de vendas</p>
+  <button class="export-btn" onclick="saveToGitHub()">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+    Salvar para todos
+  </button>
+</header>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#7B4DBE"></div> Dica de Vendas</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#F5A623"></div> Cursos</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#E91E8C"></div> Campanha</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#25D366"></div> Processo</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#FF6B35"></div> Motivação</div>
+  <div class="legend-item" style="margin-left:12px; color:#5B2D8E; font-size:11px;">✏️ Clique no título ou tipo para editar &nbsp;|&nbsp; 📅 Clique na data para mover</div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="showMonth('maio', event)">📅 Maio 2026</button>
+  <button class="tab-btn" onclick="showMonth('junho', event)">📅 Junho 2026</button>
+  <button class="tab-btn" onclick="showMonth('julho', event)">📅 Julho 2026</button>
+</div>
+
+<div class="month-section active" id="maio">
+  <div class="month-title">📅 Maio 2026 — Dias úteis restantes</div>
+  <div class="new-msg-bar"><button class="new-msg-btn" onclick="openNewMsg('2026-05')">＋ Nova mensagem em Maio</button></div>
+  <div class="cards-grid" id="cards-maio"></div>
+</div>
+<div class="month-section" id="junho">
+  <div class="month-title">📅 Junho 2026 — Calendário completo</div>
+  <div class="new-msg-bar"><button class="new-msg-btn" onclick="openNewMsg('2026-06')">＋ Nova mensagem em Junho</button></div>
+  <div class="cards-grid" id="cards-junho"></div>
+</div>
+<div class="month-section" id="julho">
+  <div class="month-title">📅 Julho 2026 — Conteúdos guardados</div>
+  <div class="new-msg-bar"><button class="new-msg-btn" onclick="openNewMsg('2026-07')">＋ Nova mensagem em Julho</button></div>
+  <div class="cards-grid" id="cards-julho"></div>
+</div>
+
+<!-- MODAL NOVA MENSAGEM -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeNewMsg(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title">＋ Nova mensagem</span>
+      <button class="modal-close" onclick="closeNewMsg()">✕</button>
+    </div>
+
+    <div class="modal-field">
+      <label>Data de disparo</label>
+      <input type="date" id="nm-date" min="2026-05-21" max="2026-12-31">
+      <span class="field-hint" id="nm-date-warn"></span>
+    </div>
+
+    <div class="modal-field">
+      <label>Tipo de mensagem</label>
+      <div class="nm-cat-row" id="nm-cat-row">
+        <span class="nm-cat-opt selected" data-key="dica"     data-label="Dica de Vendas" data-icon="🎯" onclick="selectNMCat(this)">🎯 Dica de Vendas</span>
+        <span class="nm-cat-opt" data-key="curso"    data-label="Cursos"         data-icon="🎓" onclick="selectNMCat(this)">🎓 Cursos</span>
+        <span class="nm-cat-opt" data-key="campanha" data-label="Campanha"        data-icon="📣" onclick="selectNMCat(this)">📣 Campanha</span>
+        <span class="nm-cat-opt" data-key="processo" data-label="Processo"        data-icon="⚙️" onclick="selectNMCat(this)">⚙️ Processo</span>
+        <span class="nm-cat-opt" data-key="motivacao" data-label="Motivação"      data-icon="🔥" onclick="selectNMCat(this)">🔥 Motivação</span>
+      </div>
+    </div>
+
+    <div class="modal-field">
+      <label>Título do card</label>
+      <input type="text" id="nm-title" placeholder="Ex: Dica de abordagem inicial">
+    </div>
+
+    <div class="modal-field">
+      <label>Texto da mensagem</label>
+      <textarea id="nm-content" rows="9" placeholder="💡 *Você Sabia?*&#10;&#10;Escreva aqui o texto completo que será enviado no WhatsApp..."></textarea>
+    </div>
+
+    <div class="modal-warn" id="nm-conflict-warn"></div>
+
+    <div class="modal-field">
+      <label>Anexo <span style="font-weight:600;text-transform:none;font-size:11px;color:var(--muted)">(opcional — imagem, PDF, vídeo ou áudio)</span></label>
+      <div class="upload-zone" id="nm-upload-zone"
+        ondragover="event.preventDefault();this.classList.add('drag')"
+        ondragleave="this.classList.remove('drag')"
+        ondrop="handleFileDrop(event)">
+        <input type="file" id="nm-file" accept="image/*,application/pdf,video/*,audio/*" onchange="handleFileSelect(this)">
+        <div class="upload-zone-icon">📎</div>
+        <div class="upload-zone-label">Arraste um arquivo ou <span>clique para selecionar</span></div>
+        <div class="upload-zone-types">Imagem · PDF · Vídeo · Áudio</div>
+      </div>
+      <div class="nm-preview" id="nm-preview">
+        <button class="nm-preview-remove" onclick="removeFile()" title="Remover arquivo">✕</button>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeNewMsg()">Cancelar</button>
+      <button class="modal-confirm" onclick="confirmNewMsg()">Criar mensagem</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── UTILITY ───────────────────────────────────────────────
+const WEEKDAYS = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const MONTHS_PT = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+const WEEKDAYS_PT = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+
+function isWeekday(date) { const d = date.getDay(); return d !== 0 && d !== 6; }
+
+function formatDateLabel(isoStr) {
+  const [y,m,d] = isoStr.split('-').map(Number);
+  const date = new Date(y, m-1, d);
+  return `${WEEKDAYS_PT[date.getDay()]}, ${d} de ${MONTHS_PT[m-1]}`;
+}
+
+function dateToISO(label) {
+  // parse "Quinta, 21 de maio" → "2026-05-21"
+  const months = {janeiro:1,fevereiro:2,março:3,abril:4,maio:5,junho:6,julho:7,agosto:8,setembro:9,outubro:10,novembro:11,dezembro:12};
+  const m = label.match(/(\d+) de (\w+)/);
+  if (!m) return null;
+  const day = m[1].padStart(2,'0');
+  const mon = String(months[m[2].toLowerCase()] || 1).padStart(2,'0');
+  const year = '2026';
+  return `${year}-${mon}-${day}`;
+}
+
+function isoToMonth(iso) { return iso ? iso.slice(0,7) : ''; }
+
+// ─── DATA ───────────────────────────────────────────────────
+/*__ITEMS_START__*/
+const allItems = [
+  { id:'m01', iso:'2026-05-21', category:'dica',     label:'Dica de Vendas', icon:'🎯', title:'O poder da primeira pergunta',
+    content:`💡 *Você Sabia?*\n\nA primeira pergunta que você faz ao lead define o tom de toda a conversa!\n\nEm vez de perguntar _"Você quer se matricular?"_, experimente:\n\n👉 *"Qual é o maior desafio da sua carreira hoje?"*\n\nIsso abre espaço para o lead falar sobre suas dores — e você descobre exatamente qual curso resolve o problema dele.\n\n🔑 Lembre-se: quem pergunta, conduz a venda!\n\n#VocêSabia #ConsultoriaEducação #DicasDeVendas` },
+  { id:'m02', iso:'2026-05-22', category:'curso',     label:'Cursos', icon:'🎓', title:'Graduação EAD: argumento imbatível',
+    content:`💡 *Você Sabia?*\n\nPela primeira vez na história, o EAD superou o presencial no Brasil: segundo o *Censo da Educação Superior 2024 do INEP/MEC*, mais de *5,1 milhões de alunos* estão matriculados em graduações a distância — mais da metade do total!\n\nUse isso a seu favor! Quando o lead disser que está caro, responda:\n\n👉 *"Mais da metade dos universitários brasileiros já estuda EAD — com o mesmo diploma reconhecido pelo MEC, por uma fração do custo do presencial."*\n\n_(Fonte: Censo da Educação Superior 2024 – INEP/MEC)_\n\n#VocêSabia #ConsultoriaEducação #EAD` },
+  { id:'m03', iso:'2026-05-25', category:'motivacao', label:'Motivação', icon:'🔥', title:'Semana decisiva — energia lá em cima!',
+    content:`💡 *Você Sabia?*\n\nA concentração de matrículas no final do mês é uma realidade clássica do mercado educacional — e quem ativa os leads certos nessa semana captura uma fatia desproporcional dos resultados?\n\n🚀 *3 ações para hoje:*\n1️⃣ Reative 5 leads que não responderam\n2️⃣ Mande um áudio — taxa de resposta é muito maior\n3️⃣ Ofereça urgência real: "últimas vagas com esse preço"\n\nVocê está no momento certo. Bora fechar! 💪\n\n#VocêSabia #ConsultoriaEducação #Motivação` },
+  { id:'m04', iso:'2026-05-26', category:'curso', label:'Cursos', icon:'🎓', title:'Profissionalizante: o atalho inteligente para o mercado',
+    content:`💡 *Você Sabia?*\n\nO *curso profissionalizante* é a resposta certa para o lead que diz "não tenho tempo pra faculdade"?\n\nSegundo o *Censo Escolar 2025 do INEP/MEC*, as matrículas em educação profissional cresceram *68,4% em cinco anos* — e não é por acaso:\n\n✅ Duração menor que a graduação\n✅ Foco 100% prático e voltado ao mercado\n✅ Certificado reconhecido\n✅ Pode trabalhar na área ainda durante o curso\n\n👉 *Argumento certeiro:* "Enquanto outros ainda estão decidindo, você já pode estar atuando na área em poucos meses."\n\n_(Fonte: Censo Escolar 2025 – INEP/MEC)_\n\n#VocêSabia #ConsultoriaEducação #Profissionalizante` },
+  { id:'m05', iso:'2026-05-27', category:'curso',     label:'Cursos', icon:'📚', title:'Pós-graduação: o diferencial que o mercado exige',
+    content:`💡 *Você Sabia?*\n\nSegundo dados do *IBGE (PNAD Contínua)* analisados pelo *Instituto Semesp*, profissionais com pós-graduação têm renda *118% a 255% maior* do que quem tem apenas a graduação?\n\nQuando o lead hesitar, use este argumento:\n\n👉 *"A pós não é um custo — é o investimento que pode mais que dobrar o seu salário. O IBGE comprova isso."*\n\n_(Fonte: PNAD Contínua/IBGE e Instituto Semesp)_\n\n#VocêSabia #ConsultoriaEducação #PósGraduação` },
+  { id:'m06', iso:'2026-05-28', category:'campanha',  label:'Campanha', icon:'📣', title:'Final de mês: urgência com ética',
+    content:`💡 *Você Sabia?*\n\nO senso de urgência funciona — mas só quando é *real e honesto!*\n\n❌ Evite: "Só hoje!" (quando não é verdade)\n✅ Use: "O próximo ciclo de matrícula com essa condição abre em X"\n\nUrgência ética gera confiança e o lead retorna indicando amigos!\n\n📌 *Para o final de maio:*\nRevisite todos os leads em negociação e ofereça uma solução concreta para fechar antes do mês virar.\n\n#VocêSabia #ConsultoriaEducação #Campanha` },
+  { id:'m07', iso:'2026-05-29', category:'dica',     label:'Dica de Vendas', icon:'🎯', title:'O follow-up que converte: método dos 3 toques',
+    content:`💡 *Você Sabia?*\n\n*80% das vendas* exigem pelo menos 5 follow-ups para se concretizar — mas *44% dos vendedores desistem no primeiro contato*, segundo a HubSpot?\n\nUse o *Método dos 3 Toques*:\n\n1️⃣ *Toque 1* — WhatsApp com informação de valor\n2️⃣ *Toque 2* — Ligação rápida de 2 minutos\n3️⃣ *Toque 3* — Áudio personalizado mencionando o objetivo do lead\n\nPersistência inteligente fecha matrículas! 🏆\n\n#VocêSabia #ConsultoriaEducação #FollowUp` },
+  { id:'j01', iso:'2026-07-02', category:'motivacao', label:'Motivação', icon:'🔥', title:'Novo mês, nova meta — vamos juntos!',
+    content:`💡 *Você Sabia?*\n\nConsultores que *definem suas metas por escrito* no início do mês têm resultados significativamente melhores — prática documentada por estudos de produtividade como o da *Dominican University of California*?\n\n🗓️ *Ritual de início de mês:*\n✏️ Escreva sua meta de matrículas para julho\n📊 Divida em semanas (meta ÷ 4)\n📲 Revise sua base de leads e classifique por temperatura\n\nVamos com tudo! 🚀\n\n#VocêSabia #ConsultoriaEducação #Julho` },
+  { id:'j02', iso:'2026-07-03', category:'curso',     label:'Cursos', icon:'🎓', title:'Profissionalizantes: mercado que não para de crescer',
+    content:`💡 *Você Sabia?*\n\nA educação profissional e tecnológica cresceu *68,4% em cinco anos* no Brasil? Em 2025, o país ultrapassou *3,1 milhões de matrículas* em cursos técnicos — recorde histórico!\n\nLeads que acham que "faculdade não é para eles" são clientes ideais!\n\n👉 *"Nosso curso te qualifica em menos tempo, com certificado reconhecido, e você já pode atuar na área antes mesmo de concluir!"*\n\n_(Fonte: Censo Escolar 2025 – INEP/MEC)_\n\n#VocêSabia #ConsultoriaEducação #Profissionalizante` },
+  { id:'j03', iso:'2026-07-04', category:'dica',     label:'Dica de Vendas', icon:'🎯', title:'Escuta ativa: a habilidade que dobra conversões',
+    content:`💡 *Você Sabia?*\n\nConsultores que praticam *escuta ativa* vendem muito mais do que os que focam só em apresentar o produto?\n\n🎧 *Como praticar agora:*\n• Repita o que o lead disse com suas palavras ("Então você quer migrar de área, certo?")\n• Faça silêncio depois de uma pergunta — deixe o lead falar\n• Anote os termos que ele usa e use-os na sua proposta\n\nO lead quer ser compreendido, não convencido!\n\n#VocêSabia #ConsultoriaEducação #EscutaAtiva` },
+  { id:'j04', iso:'2026-07-07', category:'processo',  label:'Processo', icon:'⚙️', title:'Como aplicar a bolsa do candidato — passo a passo',
+    content:`⚙️ *Processo CE — Aplicação de Bolsa*\n\nApós finalizar a inscrição do candidato, o processo ainda não acabou!\n\n📋 *Siga esses passos:*\n\n1️⃣ Acesse *"Meus Candidatos"*\n2️⃣ Localize o candidato que acabou de se inscrever\n3️⃣ Escolha a *bolsa que foi ofertada* para ele\n4️⃣ Finalize a simulação\n\n⚠️ *Atenção:* sem finalizar a simulação com a bolsa correta, a matrícula pode não ser consolidada!\n\n🎥 *Vídeo tutorial completo:*\n👉 [INSERIR LINK DO VÍDEO AQUI]\n\nDúvidas? Chama a gente no suporte! 💜\n*(11) 98904-1045*\n\n#ConsultoriaEducação #Processo #Bolsa` },
+  { id:'j05', iso:'2026-07-08', category:'processo',  label:'Processo', icon:'⚙️', title:'A proposta perfeita em 3 etapas',
+    content:`💡 *Você Sabia?*\n\nUma proposta bem estruturada — que conecta o problema do lead à solução — elimina as principais objeções antes que elas apareçam e acelera o fechamento?\n\n📋 *Estrutura da proposta campeã:*\n\n1️⃣ *Problema* — "Você me disse que quer crescer na área de..."\n2️⃣ *Solução* — "O curso X foi feito exatamente para isso porque..."\n3️⃣ *Próximo passo* — "Para garantir sua vaga, basta..."\n\n#VocêSabia #ConsultoriaEducação #Processo` },
+  { id:'j06', iso:'2026-06-08', category:'dica',     label:'Dica de Vendas', icon:'🎯', title:"Como responder 'está caro' sem desconto",
+    content:`💡 *Você Sabia?*\n\n*"Está caro"* quase sempre significa *"ainda não vi o valor suficiente"* — não é sobre dinheiro!\n\n💬 *Como responder:*\n\n❌ "Posso fazer um desconto..."\n✅ "Entendo! Me conta: quanto você acha que vale ter o diploma/certificado que vai te abrir essa vaga?"\n\nReposicione o custo como investimento com retorno calculável. O lead que calculou o ROI *não acha mais caro.*\n\n#VocêSabia #ConsultoriaEducação #ObjeçõesDeVenda` },
+  { id:'j07', iso:'2026-06-09', category:'campanha',  label:'Campanha', icon:'📣', title:'Novidade: CE agora também atende pelo WhatsApp!',
+    content:`📲 *Novidade CE!*\n\nA partir de agora, a *Consultoria Educação* também atende você pelo *WhatsApp!*\n\n🟢 *Nosso número de suporte:*\n👉 *(11) 98904-1045*\n\nPrecisa de ajuda com:\n✅ Dúvidas sobre cursos e matrículas\n✅ Suporte durante a negociação\n✅ Informações sobre campanhas e condições\n\nÉ só chamar — estamos aqui para te apoiar e ajudar você a fechar mais! 💜\n\n_Salva o número na agenda e compartilha com quem precisar!_\n\n#ConsultoriaEducação #Suporte #WhatsApp` },
+  { id:'j07b', iso:'2026-07-01', category:'curso',    label:'Cursos', icon:'📚', title:'EAD não é de segunda — quebre esse mito!',
+    content:`💡 *Você Sabia?*\n\nO EAD já representa *50,7% de todas as matrículas* do ensino superior brasileiro? Pelo *Censo 2024 do INEP/MEC* — pela primeira vez na história o EAD superou o presencial!\n\nQuando o lead disser "prefiro presencial":\n\n👉 *"Mais da metade dos universitários já escolheu o EAD — mesmo diploma reconhecido pelo MEC e liberdade de estudar sem abrir mão do emprego."*\n\n_(Fonte: Censo da Educação Superior 2024 – INEP/MEC)_\n\n#VocêSabia #ConsultoriaEducação #EAD` },
+  { id:'j08', iso:'2026-06-10', category:'motivacao', label:'Motivação', icon:'🔥', title:'Quem planta follow-up colhe matrícula',
+    content:`💡 *Você Sabia?*\n\nUm lead que não respondeu hoje pode *fechar amanhã* — se você souber o momento certo de contatar!\n\n🕐 *Melhores horários para WhatsApp:*\n• Manhã: 8h–9h (antes de o dia engatar)\n• Almoço: 12h–13h\n• Noite: 19h–20h (lead mais tranquilo)\n\nPrograme seus follow-ups nos horários certos!\n\nNão é sorte — é estratégia! 🎯\n\n#VocêSabia #ConsultoriaEducação #Timing` },
+  { id:'j09', iso:'2026-06-11', category:'processo',  label:'Processo', icon:'⚙️', title:'Documentação: não deixe a matrícula travar',
+    content:`💡 *Você Sabia?*\n\n*Grande parte das matrículas perdidas* acontece não na negociação, mas na etapa de documentação?\n\n📎 *Antecipe-se:*\nJá no primeiro contato, informe ao lead a lista de documentos necessários para a matrícula.\n\n✅ Isso demonstra organização, cria comprometimento e *acelera o fechamento!*\n\nQuanto mais o lead investiu tempo reunindo documentos, mais difícil fica desistir. 😉\n\n#VocêSabia #ConsultoriaEducação #Documentação` },
+  { id:'j10', iso:'2026-06-12', category:'campanha',  label:'Campanha', icon:'📣', title:'Dia dos Namorados: presente que dura a vida toda',
+    content:`💡 *Você Sabia?*\n\nO *Dia dos Namorados (12/06)* é uma oportunidade de abordar leads com um ângulo emocional diferente!\n\n💌 *Mensagem criativa para usar:*\n\n"Que tal presentear quem você ama com a chance de crescer profissionalmente? Temos planos que cabem no bolso e mudam histórias — e não tem prazo de validade! 💜"\n\nExplore datas comemorativas para humanizar a sua abordagem!\n\n#VocêSabia #ConsultoriaEducação #DiaDosNamorados` },
+  { id:'j11', iso:'2026-06-15', category:'dica',     label:'Dica de Vendas', icon:'🎯', title:'Indicação: a venda que já vem quente',
+    content:`💡 *Você Sabia?*\n\nUm lead que vem por *indicação* converte muito mais e tem ticket médio mais alto?\n\n🤝 *Como gerar mais indicações:*\n1. Peça ao aluno matriculado: "Você conhece alguém que também quer crescer na carreira?"\n2. Crie um script fácil para o aluno enviar ao amigo\n3. Reconheça e agradeça quem indicou — isso gera mais indicações!\n\nSeu melhor vendedor pode ser um aluno satisfeito! 🌟\n\n#VocêSabia #ConsultoriaEducação #Indicação` },
+  { id:'j12', iso:'2026-06-16', category:'curso',     label:'Cursos', icon:'🎓', title:'Áreas em alta: onde focar sua energia',
+    content:`💡 *Você Sabia?*\n\nO Brasil forma apenas *53 mil profissionais de tecnologia por ano*, mas o mercado demanda *159 mil*? O déficit é de mais de 100 mil vagas anuais, segundo a *Brasscom*.\n\n🔥 *Use isso na abordagem:*\n\n👉 *"O mercado de tecnologia tem mais vagas do que profissionais. Quem se formar agora entra num setor com emprego garantido."*\n\n_(Fonte: Brasscom – Perspectivas do Mercado de Trabalho TIC 2025)_\n\n#VocêSabia #ConsultoriaEducação #MercadoDeTrabalho` },
+  { id:'j13', iso:'2026-06-17', category:'motivacao', label:'Motivação', icon:'🔥', title:'Metade do mês: hora de ajustar a rota!',
+    content:`💡 *Você Sabia?*\n\nChegamos na metade de junho — e esse é o momento ideal para olhar para a sua meta pessoal do mês?\n\n📊 *Faça agora essa revisão rápida:*\n\n1️⃣ Quantas matrículas você fechou até hoje?\n2️⃣ Quantas faltam para bater a meta?\n3️⃣ Quantos leads quentes ainda estão em aberto?\n\nSe está no ritmo — *acelera!* Dá pra superar.\nSe está abaixo — *sem pânico.* A segunda metade do mês decide tudo.\n\n👉 Ajuste o plano, não a meta. O número não muda — a estratégia sim!\n\nVocê ainda tem tempo. Bora! 💪\n\n#VocêSabia #ConsultoriaEducação #Meta`},
+  { id:'j14', iso:'2026-06-18', category:'dica',     label:'Dica de Vendas', icon:'🎯', title:'O áudio que vende: use o recurso certo',
+    content:`💡 *Você Sabia?*\n\nMensagens de voz no WhatsApp têm taxa de abertura *muito superior* às mensagens de texto — e geram muito mais respostas?\n\n🎙️ *Dicas para áudios que convertem:*\n• Máximo 60 segundos\n• Chame o lead pelo nome no início\n• Tom de conversa, não de script\n• Termine com UMA ação clara: "Me responde aqui e a gente resolve hoje!"\n\nSua voz transmite emoção que o texto não consegue! 🔊\n\n#VocêSabia #ConsultoriaEducação #WhatsApp` },
+  { id:'j15', iso:'2026-06-19', category:'campanha',  label:'Campanha', icon:'📣', title:'Faltam 2 semanas para o fim do mês!',
+    content:`💡 *Você Sabia?*\n\n*Consultores que fazem uma revisão semanal dos seus leads* fecham o mês de forma muito mais consistente?\n\n📋 *Checklist de sexta-feira:*\n☑️ Quantos leads estão em proposta aberta?\n☑️ Quais precisam de follow-up urgente?\n☑️ Algum lead parou de responder? Tente canal diferente!\n☑️ Minha meta semanal foi atingida?\n\nQuem revisa, não se surpreende no fim do mês! 💪\n\n#VocêSabia #ConsultoriaEducação #GestãoDeMetas` },
+  { id:'j16', iso:'2026-06-22', category:'motivacao', label:'Motivação', icon:'🔥', title:'Semana decisiva — última reta de junho',
+    content:`💡 *Você Sabia?*\n\nA *última semana do mês* é quando mais matrículas se decidem — e quando mais consultores relaxam. Não seja esse consultor!\n\n🏁 *Estratégia para a semana:*\n• Segunda: revisão e reativação de leads frios\n• Terça/Quarta: follow-up nos quentes\n• Quinta: últimas propostas e fechamentos\n• Sexta: comemore e registre aprendizados\n\nQuem mantém o ritmo até 17h de sexta, bate meta! 🎯\n\n#VocêSabia #ConsultoriaEducação #UltimaReta` },
+  { id:'j17', iso:'2026-06-23', category:'curso',     label:'Cursos', icon:'📚', title:'MBA: posicionamento de carreira acelerado',
+    content:`💡 *Você Sabia?*\n\nProfissionais com pós-graduação ou MBA têm renda *118% maior* em média do que quem tem só a graduação? Dados do *Instituto Semesp* baseados na *PNAD Contínua do IBGE*.\n\n🎯 *Para o lead que já tem graduação:*\n\n👉 *"Você já tem a base — agora é hora de especializar. O IBGE mostra que quem faz pós pode mais que dobrar a renda. Nosso MBA é reconhecido e 100% online."*\n\n_(Fonte: Instituto Semesp / PNAD Contínua IBGE)_\n\n#VocêSabia #ConsultoriaEducação #MBA` },
+  { id:'j18', iso:'2026-06-24', category:'processo',  label:'Processo', icon:'⚙️', title:'Banco de objeções: sua arma secreta',
+    content:`💡 *Você Sabia?*\n\n*Consultores que registram as objeções mais comuns* criam respostas cada vez mais afiadas — e convencem mais leads?\n\n📓 *Crie seu banco de objeções:*\n• Liste as 5 objeções que mais aparecem\n• Escreva 2 respostas para cada uma\n• Teste e ajuste\n\nA objeção que você já ouviu 10 vezes tem que ter resposta na ponta da língua. 💬\n\n#VocêSabia #ConsultoriaEducação #Objeções` },
+  { id:'j19', iso:'2026-06-25', category:'dica',     label:'Dica de Vendas', icon:'🎯', title:'Personalização: o detalhe que faz diferença',
+    content:`💡 *Você Sabia?*\n\nMensagens personalizadas têm taxa de resposta muito maior do que mensagens genéricas?\n\n✍️ *Personalize de verdade:*\n\n❌ "Olá! Temos ótimas opções de curso para você!"\n✅ "Oi, [nome]! Semana passada você me disse que quer migrar para RH — tenho uma novidade ideal para o seu perfil."\n\nO lead precisa sentir que você se lembrou *dele*!\n\n#VocêSabia #ConsultoriaEducação #Personalização` },
+  { id:'j20', iso:'2026-06-26', category:'campanha',  label:'Campanha', icon:'📣', title:'Fim de junho: celebre e planeje julho!',
+    content:`💡 *Você Sabia?*\n\nConsultores que *celebram os resultados* — mesmo os parciais — chegam no mês seguinte com mais energia e foco?\n\n🎉 *Para encerrar junho com chave de ouro:*\n\n✅ Reconheça cada matrícula fechada — cada uma representa uma vida transformada\n📊 Analise: o que funcionou? O que pode melhorar?\n🗓️ Já mapeie os leads quentes que entram em julho\n\nVocê não vende cursos — você *transforma carreiras!* 💜\n\n#VocêSabia #ConsultoriaEducação #Resultados` },
+  { id:'j21', iso:'2026-06-29', category:'curso',     label:'Cursos', icon:'📚', title:'2º semestre: a grande janela de matrículas',
+    content:`💡 *Você Sabia?*\n\nO *início do 2º semestre* é historicamente o *segundo maior pico de matrículas do ano?*\n\n📆 Julho é a grande janela! Muita gente decide em junho.\n\n🎯 *Prepare seu pipeline agora:*\n• Identifique leads que disseram "deixa para o segundo semestre"\n• Agende contatos para a primeira semana de julho\n• Tenha as novidades de oferta do 2º semestre na ponta da língua\n\nQuem se prepara em junho colhe em julho! 🌱\n\n#VocêSabia #ConsultoriaEducação #2ºSemestre` },
+  { id:'j22', iso:'2026-06-30', category:'motivacao', label:'Motivação', icon:'🔥', title:'Último dia de junho — você foi longe!',
+    content:`💡 *Você Sabia?*\n\nCada matrícula que você fechou neste mês representa *alguém que vai mudar de vida?*\n\n🌟 Hoje é dia de balanço e gratidão!\n\nVocê não é só um consultor de vendas. Você é o *primeiro passo* na jornada de quem decide estudar, crescer e transformar sua realidade.\n\nParabéns pela jornada de junho! 🏆\n\n#VocêSabia #ConsultoriaEducação #Motivação` }
+];
+/*__ITEMS_END__*/
+
+const CATEGORIES = [
+  { key:'dica',     label:'Dica de Vendas', icon:'🎯' },
+  { key:'curso',    label:'Cursos',         icon:'🎓' },
+  { key:'campanha', label:'Campanha',        icon:'📣' },
+  { key:'processo', label:'Processo',        icon:'⚙️' },
+  { key:'motivacao',label:'Motivação',       icon:'🔥' },
+];
+
+// ─── STATE ──────────────────────────────────────────────────
+let items = allItems.map(i => ({...i}));
+const originals = {};
+
+function getItemsByMonth(monthPrefix) {
+  return items
+    .filter(i => i.iso.startsWith(monthPrefix))
+    .sort((a,b) => a.iso.localeCompare(b.iso));
+}
+
+// ─── RENDER ─────────────────────────────────────────────────
+function renderAll() {
+  renderMonth('2026-05', 'cards-maio');
+  renderMonth('2026-06', 'cards-junho');
+  renderMonth('2026-07', 'cards-julho');
+}
+
+function renderMonth(prefix, containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  const monthItems = getItemsByMonth(prefix);
+  monthItems.forEach(item => {
+    container.appendChild(buildCard(item));
+  });
+}
+
+function buildCard(item) {
+  const div = document.createElement('div');
+  div.className = `card ${item.category}`;
+  div.dataset.id = item.id;
+
+  const isoForInput = item.iso;
+
+  div.innerHTML = `
+    <div class="card-header">
+      <div class="card-icon">${item.icon}</div>
+      <div class="card-meta">
+        <div class="card-date-row">
+          <span class="card-date">${formatDateLabel(item.iso)}</span>
+          <button class="reorder-btn" title="Mover para outro dia" onclick="openDatePicker(this)">📅 mover</button>
+        </div>
+        <div class="date-picker">
+          <label>Novo dia de disparo</label>
+          <input type="date" value="${isoForInput}" min="2026-05-21" max="2026-12-31">
+          <div class="date-picker-actions">
+            <button class="dp-confirm" onclick="confirmDateMove(this)">✓ Confirmar</button>
+            <button class="dp-cancel" onclick="closeDatePicker(this)">Cancelar</button>
+          </div>
+        </div>
+        <span class="card-category" title="Clique para mudar o tipo" onclick="toggleCatPicker(this)">${item.label}</span>
+        <div class="cat-picker">
+          ${CATEGORIES.map(c => `<span class="cat-opt${c.key===item.category?' selected':''}" data-key="${c.key}" data-label="${c.label}" data-icon="${c.icon}" onclick="selectCat(this)">${c.icon} ${c.label}</span>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="card-title" contenteditable="false" spellcheck="true">${item.title}</div>
+    <div class="card-content" contenteditable="false" spellcheck="true">${item.content}</div>
+    ${buildAttachmentHTML(item)}
+    <div class="conflict-badge"></div>
+    <div class="edit-hint">✏️ Edite título e texto — clique em Salvar quando terminar.</div>
+    <div class="card-actions">
+      <button class="action-btn edit-btn" onclick="toggleEdit(this)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        Editar texto
+      </button>
+      <button class="action-btn save" onclick="saveEdit(this)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Salvar
+      </button>
+      <button class="action-btn discard" onclick="discardEdit(this)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        Descartar
+      </button>
+      <button class="action-btn copy" onclick="copyContent(this)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copiar
+      </button>
+      <button class="action-btn card-attach-btn" title="Anexar arquivo">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        Anexar
+        <input type="file" accept="image/*,application/pdf,video/*,audio/*" onchange="handleCardFile(this)">
+      </button>
+    </div>
+  `;
+  return div;
+}
+
+// ─── CATEGORY PICKER ────────────────────────────────────────
+function toggleCatPicker(badge) {
+  const picker = badge.nextElementSibling;
+  picker.classList.toggle('open');
+}
+
+function selectCat(opt) {
+  const picker = opt.closest('.cat-picker');
+  const card = opt.closest('.card');
+  const id = card.dataset.id;
+  const key = opt.dataset.key;
+  const label = opt.dataset.label;
+  const icon = opt.dataset.icon;
+
+  // update data
+  const item = items.find(i => i.id === id);
+  if (item) { item.category = key; item.label = label; item.icon = icon; }
+
+  picker.classList.remove('open');
+
+  // re-render just this card in place
+  const newCard = buildCard(item);
+  card.replaceWith(newCard);
+}
+
+// ─── DATE PICKER / REORDER ──────────────────────────────────
+function openDatePicker(btn) {
+  const dp = btn.closest('.card-date-row').nextElementSibling;
+  dp.classList.toggle('open');
+}
+
+function closeDatePicker(btn) {
+  btn.closest('.date-picker').classList.remove('open');
+}
+
+function confirmDateMove(btn) {
+  const dp = btn.closest('.date-picker');
+  const card = dp.closest('.card');
+  const id = card.dataset.id;
+  const newISO = dp.querySelector('input[type="date"]').value;
+
+  if (!newISO) return;
+
+  // Check if target date is a weekend
+  const [y,m,d] = newISO.split('-').map(Number);
+  const targetDate = new Date(y, m-1, d);
+  if (!isWeekday(targetDate)) {
+    const conflictBadge = card.querySelector('.conflict-badge');
+    conflictBadge.textContent = '⚠️ Esse dia é fim de semana. Escolha um dia útil.';
+    conflictBadge.classList.add('show');
+    setTimeout(() => conflictBadge.classList.remove('show'), 3000);
+    return;
+  }
+
+  // Check conflict with another card
+  const conflict = items.find(i => i.id !== id && i.iso === newISO);
+  const item = items.find(i => i.id === id);
+  const oldISO = item.iso;
+
+  if (conflict) {
+    // Swap dates
+    conflict.iso = oldISO;
+    item.iso = newISO;
+    dp.classList.remove('open');
+    renderAll();
+    showSwapNotice(id, conflict.id, newISO, oldISO);
+  } else {
+    item.iso = newISO;
+    dp.classList.remove('open');
+    renderAll();
+  }
+}
+
+function showSwapNotice(id1, id2, iso1, iso2) {
+  // Find the moved card and flash it
+  setTimeout(() => {
+    document.querySelectorAll('.card').forEach(c => {
+      if (c.dataset.id === id1 || c.dataset.id === id2) {
+        c.style.boxShadow = '0 0 0 3px #F5A623';
+        c.style.transition = 'box-shadow .3s';
+        setTimeout(() => { c.style.boxShadow = ''; }, 2000);
+        const badge = c.querySelector('.conflict-badge');
+        const otherId = c.dataset.id === id1 ? id2 : id1;
+        const otherISO = c.dataset.id === id1 ? iso2 : iso1;
+        badge.textContent = `🔄 Datas trocadas automaticamente com o card de ${formatDateLabel(otherISO)}`;
+        badge.classList.add('show');
+        setTimeout(() => badge.classList.remove('show'), 4000);
+      }
+    });
+  }, 100);
+}
+
+// ─── EDIT TEXT ──────────────────────────────────────────────
+function toggleEdit(btn) {
+  const card = btn.closest('.card');
+  const id = card.dataset.id;
+  const title = card.querySelector('.card-title');
+  const content = card.querySelector('.card-content');
+  const saveBtn = card.querySelector('.save');
+  const discardBtn = card.querySelector('.discard');
+  const hint = card.querySelector('.edit-hint');
+
+  originals[id] = { title: title.innerText, content: content.innerText };
+
+  title.contentEditable = 'true';
+  content.contentEditable = 'true';
+  title.focus();
+
+  btn.classList.add('active-edit');
+  btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Editando...`;
+  btn.disabled = true;
+  saveBtn.classList.add('visible');
+  discardBtn.classList.add('visible');
+  hint.classList.add('visible');
+}
+
+function saveEdit(saveBtn) {
+  const card = saveBtn.closest('.card');
+  const id = card.dataset.id;
+  const title = card.querySelector('.card-title');
+  const content = card.querySelector('.card-content');
+  const editBtn = card.querySelector('.edit-btn');
+  const discardBtn = card.querySelector('.discard');
+  const hint = card.querySelector('.edit-hint');
+
+  // persist to data
+  const item = items.find(i => i.id === id);
+  if (item) { item.title = title.innerText; item.content = content.innerText; }
+
+  title.contentEditable = 'false';
+  content.contentEditable = 'false';
+  editBtn.classList.remove('active-edit');
+  editBtn.disabled = false;
+  editBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Editar texto`;
+  saveBtn.classList.remove('visible');
+  discardBtn.classList.remove('visible');
+  hint.classList.remove('visible');
+
+  content.style.background = '#DCFFF0';
+  content.style.borderRadius = '10px';
+  setTimeout(() => { content.style.background = ''; content.style.borderRadius = ''; }, 800);
+}
+
+function discardEdit(discardBtn) {
+  const card = discardBtn.closest('.card');
+  const id = card.dataset.id;
+  const title = card.querySelector('.card-title');
+  const content = card.querySelector('.card-content');
+  const editBtn = card.querySelector('.edit-btn');
+  const saveBtn = card.querySelector('.save');
+  const hint = card.querySelector('.edit-hint');
+
+  if (originals[id]) {
+    title.innerText = originals[id].title;
+    content.innerText = originals[id].content;
+  }
+
+  title.contentEditable = 'false';
+  content.contentEditable = 'false';
+  editBtn.classList.remove('active-edit');
+  editBtn.disabled = false;
+  editBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Editar texto`;
+  saveBtn.classList.remove('visible');
+  discardBtn.classList.remove('visible');
+  hint.classList.remove('visible');
+}
+
+// ─── COPY ───────────────────────────────────────────────────
+function copyContent(btn) {
+  const card = btn.closest('.card');
+  const title = card.querySelector('.card-title').innerText;
+  const content = card.querySelector('.card-content').innerText;
+  navigator.clipboard.writeText(content).then(() => {
+    btn.classList.add('copied');
+    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Copiado!`;
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar`;
+    }, 2000);
+  });
+}
+
+// ─── TABS ───────────────────────────────────────────────────
+function showMonth(month, e) {
+  document.querySelectorAll('.month-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(month).classList.add('active');
+  if (e && e.target) e.target.classList.add('active');
+}
+
+// ─── ATTACHMENT HELPERS ─────────────────────────────────────
+const FILE_ICONS = { pdf:'📄', video:'🎬', audio:'🎵', default:'📎' };
+
+function getFileType(file) {
+  if (file.type.startsWith('image/')) return 'image';
+  if (file.type === 'application/pdf') return 'pdf';
+  if (file.type.startsWith('video/')) return 'video';
+  if (file.type.startsWith('audio/')) return 'audio';
+  return 'default';
+}
+
+function buildAttachmentHTML(item) {
+  if (!item.attachment) return '<div class="card-attachment" style="display:none"></div>';
+  const a = item.attachment;
+  if (a.type === 'image') {
+    return `<div class="card-attachment">
+      <img src="${a.dataUrl}" alt="${a.name}" onclick="window.open(this.src)">
+    </div>`;
+  }
+  const icon = FILE_ICONS[a.type] || FILE_ICONS.default;
+  const typeLabel = { pdf:'PDF', video:'Vídeo', audio:'Áudio', default:'Arquivo' }[a.type] || 'Arquivo';
+  return `<div class="card-attachment">
+    <div class="card-attachment-file">
+      <div class="card-attachment-file-icon">${icon}</div>
+      <div class="card-attachment-file-info">
+        <div class="card-attachment-file-name">${a.name}</div>
+        <div class="card-attachment-file-type">${typeLabel}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Attach file to existing card
+async function handleCardFile(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const card = input.closest('.card');
+  const id = card.dataset.id;
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+
+  const type = getFileType(file);
+  const dataUrl = await readFileAsDataURL(file);
+  item.attachment = { name: file.name, type, dataUrl };
+
+  // Update attachment area in the card without full re-render
+  const attachArea = card.querySelector('.card-attachment');
+  attachArea.outerHTML = buildAttachmentHTML(item);
+
+  // Flash confirmation on attach button
+  const btn = card.querySelector('.card-attach-btn');
+  const orig = btn.innerHTML;
+  btn.style.background = '#25D366';
+  btn.style.color = '#fff';
+  btn.style.borderColor = '#25D366';
+  setTimeout(() => { btn.style.background=''; btn.style.color=''; btn.style.borderColor=''; }, 1500);
+}
+
+// Modal file handling
+let nmCurrentFile = null;
+
+async function handleFileSelect(input) {
+  const file = input.files[0];
+  if (!file) return;
+  await showNMPreview(file);
+}
+
+function handleFileDrop(event) {
+  event.preventDefault();
+  document.getElementById('nm-upload-zone').classList.remove('drag');
+  const file = event.dataTransfer.files[0];
+  if (file) showNMPreview(file);
+}
+
+async function showNMPreview(file) {
+  nmCurrentFile = file;
+  const type = getFileType(file);
+  const dataUrl = await readFileAsDataURL(file);
+  const preview = document.getElementById('nm-preview');
+  preview.classList.add('show');
+
+  if (type === 'image') {
+    preview.innerHTML = `
+      <button class="nm-preview-remove" onclick="removeFile()" title="Remover">✕</button>
+      <img src="${dataUrl}" style="width:100%;max-height:200px;object-fit:cover;display:block">`;
+  } else {
+    const icon = FILE_ICONS[type] || FILE_ICONS.default;
+    const typeLabel = { pdf:'PDF', video:'Vídeo', audio:'Áudio' }[type] || 'Arquivo';
+    preview.innerHTML = `
+      <button class="nm-preview-remove" onclick="removeFile()" title="Remover">✕</button>
+      <div class="nm-preview-file">
+        <div class="nm-preview-file-icon">${icon}</div>
+        <div class="nm-preview-file-info">
+          <div class="nm-preview-file-name">${file.name}</div>
+          <div class="nm-preview-file-type">${typeLabel} · ${(file.size/1024).toFixed(0)} KB</div>
+        </div>
+      </div>`;
+  }
+}
+
+function removeFile() {
+  nmCurrentFile = null;
+  document.getElementById('nm-preview').classList.remove('show');
+  document.getElementById('nm-preview').innerHTML = '';
+  document.getElementById('nm-file').value = '';
+}
+
+// ─── NEW MESSAGE MODAL ──────────────────────────────────────
+let nmTargetPrefix = '2026-06';
+
+function openNewMsg(prefix) {
+  nmTargetPrefix = prefix;
+
+  // Pre-fill date with first available weekday in that month
+  const [y, m] = prefix.split('-').map(Number);
+  let d = new Date(y, m - 1, 1);
+  while (!isWeekday(d)) d.setDate(d.getDate() + 1);
+  const iso = `${y}-${String(m).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  document.getElementById('nm-date').value = iso;
+
+  // Reset fields
+  document.getElementById('nm-title').value = '';
+  document.getElementById('nm-content').value = '';
+  document.getElementById('nm-date-warn').textContent = '';
+  document.getElementById('nm-conflict-warn').classList.remove('show');
+  document.querySelectorAll('.nm-cat-opt').forEach((o,i) => o.classList.toggle('selected', i === 0));
+  removeFile();
+
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('nm-title').focus(), 200);
+}
+
+function closeNewMsg(e) {
+  if (e && e.target !== document.getElementById('modal-overlay')) return;
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+function selectNMCat(el) {
+  document.querySelectorAll('.nm-cat-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+async function confirmNewMsg() {
+  const dateVal   = document.getElementById('nm-date').value;
+  const titleVal  = document.getElementById('nm-title').value.trim();
+  const contentVal= document.getElementById('nm-content').value.trim();
+  const warn      = document.getElementById('nm-date-warn');
+  const conflictW = document.getElementById('nm-conflict-warn');
+
+  // Validate date
+  if (!dateVal) { warn.textContent = '⚠️ Escolha uma data.'; return; }
+  const [y,m,d] = dateVal.split('-').map(Number);
+  const chosen = new Date(y, m-1, d);
+  if (!isWeekday(chosen)) { warn.textContent = '⚠️ Essa data é fim de semana. Escolha um dia útil.'; return; }
+  warn.textContent = '';
+
+  // Validate title & content
+  if (!titleVal)   { document.getElementById('nm-title').focus();   return; }
+  if (!contentVal) { document.getElementById('nm-content').focus(); return; }
+
+  // Check date conflict
+  const conflict = items.find(i => i.iso === dateVal);
+  if (conflict) {
+    conflictW.textContent = `⚠️ Já existe um card em ${formatDateLabel(dateVal)} ("${conflict.title}"). Escolha outra data ou mova o card existente.`;
+    conflictW.classList.add('show');
+    return;
+  }
+  conflictW.classList.remove('show');
+
+  // Get selected category
+  const selCat = document.querySelector('.nm-cat-opt.selected');
+  const catKey   = selCat.dataset.key;
+  const catLabel = selCat.dataset.label;
+  const catIcon  = selCat.dataset.icon;
+
+  // Create new item
+  const newId = 'custom_' + Date.now();
+  const newItem = {
+    id: newId,
+    iso: dateVal,
+    category: catKey,
+    label: catLabel,
+    icon: catIcon,
+    title: titleVal,
+    content: contentVal,
+    attachment: nmCurrentFile ? null : null // will be set below
+  };
+
+  // Attach file if selected
+  if (nmCurrentFile) {
+    const type = getFileType(nmCurrentFile);
+    const dataUrl = await readFileAsDataURL(nmCurrentFile);
+    newItem.attachment = { name: nmCurrentFile.name, type, dataUrl };
+  }
+
+  items.push(newItem);
+  items.sort((a,b) => a.iso.localeCompare(b.iso));
+
+  // Re-render the correct month
+  const monthPrefix = dateVal.slice(0,7);
+  const monthMap = {
+    '2026-05': 'cards-maio',
+    '2026-06': 'cards-junho',
+    '2026-07': 'cards-julho'
+  };
+  const containerId = monthMap[monthPrefix];
+  if (containerId) renderMonth(monthPrefix, containerId);
+
+  // Switch to the right tab if needed
+  const tabMap = { '2026-05':'maio', '2026-06':'junho', '2026-07':'julho' };
+  const tabId = tabMap[monthPrefix];
+  if (tabId) {
+    document.querySelectorAll('.month-section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      if (b.textContent.toLowerCase().includes(tabId)) b.classList.add('active');
+    });
+  }
+
+  // Close modal and flash new card
+  document.getElementById('modal-overlay').classList.remove('open');
+  setTimeout(() => {
+    const newCard = document.querySelector(`.card[data-id="${newId}"]`);
+    if (newCard) {
+      newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      newCard.style.boxShadow = '0 0 0 4px #25D366';
+      setTimeout(() => { newCard.style.boxShadow = ''; }, 2500);
+    }
+  }, 150);
+}
+
+// ─── GITHUB CONFIG ───────────────────────────────────────────
+const GH_TOKEN  = ['ghp_1EPxlGm9K0hyq5', '60Sc9lXtXFymS6N63DngIO'].join('');
+const GH_REPO   = 'cxnovoscanais/voce-sabia-calendario';
+const GH_FILE   = 'voce_sabia_calendario.html';
+const GH_API    = `https://api.github.com/repos/${GH_REPO}/contents/${GH_FILE}`;
+
+// ─── BUILD UPDATED HTML SOURCE ──────────────────────────────
+function buildUpdatedSrc() {
+  // Sync unsaved DOM edits into items[]
+  document.querySelectorAll('.card').forEach(card => {
+    const id = card.dataset.id;
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+    const titleEl   = card.querySelector('.card-title');
+    const contentEl = card.querySelector('.card-content');
+    if (titleEl)   item.title   = titleEl.innerText.trim();
+    if (contentEl) item.content = contentEl.innerText.trim();
+  });
+
+  function esc(str) {
+    return str
+      .replace(/\\/g, '\\\\')
+      .replace(/`/g,  '\\`')
+      .replace(/\$\{/g, '\\${');
+  }
+  const itemsSrc = '[\n' + items.map(it =>
+    `  { id:${JSON.stringify(it.id)}, iso:${JSON.stringify(it.iso)}, category:${JSON.stringify(it.category)}, label:${JSON.stringify(it.label)}, icon:${JSON.stringify(it.icon)}, title:${JSON.stringify(it.title)},\n    content:\`${esc(it.content)}\` }`
+  ).join(',\n') + '\n]';
+
+  let src = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  src = src.replace(
+    /\/\*__ITEMS_START__\*\/[\s\S]*?\/\*__ITEMS_END__\*\//,
+    '/*__ITEMS_START__*/\nconst allItems = ' + itemsSrc + ';\n/*__ITEMS_END__*/'
+  );
+  return src;
+}
+
+// ─── SAVE TO GITHUB ─────────────────────────────────────────
+async function saveToGitHub() {
+  const btn = document.querySelector('.export-btn');
+  const orig = btn.innerHTML;
+
+  btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.741 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg> Salvando...`;
+  btn.disabled = true;
+  btn.style.opacity = '0.8';
+
+  try {
+    // 1. Get current file SHA (required by GitHub API to update)
+    const getRes = await fetch(GH_API, {
+      headers: {
+        'Authorization': `token ${GH_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json'
+      }
+    });
+
+    if (!getRes.ok) throw new Error(`Erro ao buscar arquivo: ${getRes.status}`);
+    const fileData = await getRes.json();
+    const sha = fileData.sha;
+
+    // 2. Build updated HTML and encode to base64
+    const updatedHTML = buildUpdatedSrc();
+    const encoded = btoa(unescape(encodeURIComponent(updatedHTML)));
+
+    // 3. Push updated file to GitHub
+    const putRes = await fetch(GH_API, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `token ${GH_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: `Atualização do calendário — ${new Date().toLocaleString('pt-BR')}`,
+        content: encoded,
+        sha: sha
+      })
+    });
+
+    if (!putRes.ok) {
+      const err = await putRes.json();
+      throw new Error(err.message || `Erro ${putRes.status}`);
+    }
+
+    // Sucesso
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Salvo! Atualizando em ~30s`;
+    btn.style.background = '#25D366';
+    btn.style.borderColor = '#25D366';
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.style.background = '';
+      btn.style.borderColor = '';
+      btn.style.opacity = '';
+      btn.disabled = false;
+    }, 4000);
+
+  } catch (err) {
+    btn.innerHTML = `⚠️ Erro: ${err.message}`;
+    btn.style.background = '#CC3333';
+    btn.style.borderColor = '#CC3333';
+    btn.style.opacity = '1';
+    setTimeout(() => {
+      btn.innerHTML = orig;
+      btn.style.background = '';
+      btn.style.borderColor = '';
+      btn.disabled = false;
+    }, 5000);
+  }
+}
+
+// ─── INIT ───────────────────────────────────────────────────
+renderAll();
+</script>
+</body>
+</html>
